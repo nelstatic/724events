@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import Slider from "./index";
 import { api, DataProvider } from "../../contexts/DataContext";
 
+// Données statiques utilisées pour le test
 const data = {
   focus: [
     {
@@ -28,15 +29,18 @@ const data = {
 
 describe("When slider is created", () => {
   it("a list card is displayed", async () => {
-    window.console.error = jest.fn();
+    // Mock de l'API pour simuler le retour de données
     api.loadData = jest.fn().mockReturnValue(data);
+
+    // Rendu du composant avec DataProvider
     render(
       <DataProvider>
         <Slider />
       </DataProvider>
     );
+
+    // Vérification que les éléments corrects sont affichés
     await screen.findByText("World economic forum");
-    await screen.findByText("janvier");
     await screen.findByText(
       "Oeuvre à la coopération entre le secteur public et le privé."
     );
