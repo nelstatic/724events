@@ -34,7 +34,7 @@ export const DataProvider = ({ children }) => {
       const loadedData = await api.loadData();
       setData(loadedData);
     } catch (err) {
-      setError(err.message || "An error occurred");
+      setError(err.message || "error on calling events");
     } finally {
       setLoading(false);
     }

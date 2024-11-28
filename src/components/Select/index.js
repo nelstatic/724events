@@ -112,4 +112,13 @@ Select.defaultProps = {
   name: "select",
 };
 
+const handleFilterChange = (value) => {
+  console.log("Valeur sélectionnée :", value); // Confirmez que la valeur est transmise
+};
+
+<Select
+  selection={["Catégorie 1", "Catégorie 2", "Catégorie 3"]}
+  onChange={handleFilterChange}
+/>;
+
 export default Select;
