@@ -8,14 +8,14 @@ const Slider = () => {
   const { data } = useData();
   const [index, setIndex] = useState(0);
   const byDateDesc = data?.focus.sort((evtA, evtB) =>
-    new Date(evtA.date) < new Date(evtB.date) ? -1 : 1
+    new Date(evtA.date) > new Date(evtB.date) ? -1 : 1
   );
   useEffect(() => {
     const intervalId = setInterval(() => {
       setIndex((prevIndex) => (prevIndex + 1) % byDateDesc.length);
     }, 5000);
 
-    return () => clearInterval(intervalId); // Nettoyage
+    return () => clearInterval(intervalId); // Nettoyage du timer
   }, [byDateDesc]);
 
   return (
