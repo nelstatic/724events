@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import EventCard from "../../components/EventCard";
 import Select from "../../components/Select";
 import { useData } from "../../contexts/DataContext";
@@ -11,38 +11,48 @@ const PER_PAGE = 9;
 
 const EventList = () => {
   const { data, error } = useData();
-  const [type, setType] = useState();
-  const [currentPage, setCurrentPage] = useState(1);
-  const filteredEvents = (
-    (!type
-      ? data?.events
-      : data?.events) || []
-  ).filter((event, index) => {
-    if (
-      (currentPage - 1) * PER_PAGE <= index &&
-      PER_PAGE * currentPage > index
-    ) {
-      return true;
-    }
-    return false;
-  });
-  const changeType = (evtType) => {
-    setCurrentPage(1);
-    setType(evtType);
-  };
-  const pageNumber = Math.floor((filteredEvents?.length || 0) / PER_PAGE) + 1;
-  const typeList = new Set(data?.events.map((event) => event.type));
+  const [type, setType] = useState(null); // Type sélectionné pour le filtre
+  const [currentPage, setCurrentPage] = useState(1); // Page actuelle
+
+  // Liste des types
+  const typeList = useMemo(
+    () => [...new Set(data?.events.map((event) => event.type))],
+    [data]
+  );
+
+  // Filtrage et pagination combinés
+  const filteredEvents = useMemo(() => {
+    const startIndex = (currentPage - 1) * PER_PAGE;
+    const endIndex = startIndex + PER_PAGE;
+
+    return (data?.events || [])
+      .filter((event) => !type || event.type === type) // Applique le filtre par type
+      .slice(startIndex, endIndex); // Applique la pagination
+  }, [data, type, currentPage]);
+
+  // Nombre total de pages
+  const pageNumber = useMemo(() => {
+    const totalEvents = (data?.events || []).filter(
+      (event) => !type || event.type === type
+    ).length;
+
+    return Math.ceil(totalEvents / PER_PAGE);
+  }, [data, type]);
+
   return (
     <>
       {error && <div>An error occured</div>}
-      {data === null ? (
+      {!data ? (
         "loading"
       ) : (
         <>
           <h3 className="SelectTitle">Catégories</h3>
           <Select
-            selection={Array.from(typeList)}
-            onChange={(value) => (value ? changeType(value) : changeType(null))}
+            selection={typeList}
+            onChange={(value) => {
+              setType(value === "Toutes" ? null : value);
+              setCurrentPage(1); // Réinitialise à la première page lors d'un changement de filtre
+            }}
           />
           <div id="events" className="ListContainer">
             {filteredEvents.map((event) => (
@@ -60,12 +70,19 @@ const EventList = () => {
             ))}
           </div>
           <div className="Pagination">
-            {[...Array(pageNumber || 0)].map((_, n) => (
-              // eslint-disable-next-line react/no-array-index-key
-              <a key={n} href="#events" onClick={() => setCurrentPage(n + 1)}>
-                {n + 1}
-              </a>
-            ))}
+            {[...Array(pageNumber)].map((_, index) => {
+              const page = index + 1; // Numéro de la page
+              return (
+                <a
+                  key={`page-${page}-${Math.random()}`} // Génère une clé unique en combinant le numéro de page et un identifiant aléatoire
+                  href="#events"
+                  className={page === currentPage ? "active" : ""}
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </a>
+              );
+            })}
           </div>
         </>
       )}

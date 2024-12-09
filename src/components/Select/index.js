@@ -13,31 +13,45 @@ const Select = ({
   label,
   type = "normal",
 }) => {
-  const [value, setValue] = useState();
+  const [value, setValue] = useState(null); // Initialiser avec `null` pour gérer l'option "Toutes"
   const [collapsed, setCollapsed] = useState(true);
+
   const changeValue = (newValue) => {
-    onChange();
     setValue(newValue);
-    setCollapsed(newValue);
+    setCollapsed(true); // Réduire la liste après sélection
+    onChange(newValue); // Passer la valeur sélectionnée au parent
   };
+
   return (
     <div className={`SelectContainer ${type}`} data-testid="select-testid">
       {label && <div className="label">{label}</div>}
       <div className="Select">
         <ul>
-          <li className={collapsed ? "SelectTitle--show" : "SelectTitle--hide"}>
+          {/* Affichage du titre ou valeur sélectionnée */}
+          <li
+            className={collapsed ? "SelectTitle--show" : "SelectTitle--hide"}
+            onClick={() => setCollapsed(!collapsed)} // Basculer l'état du menu
+          >
             {value || (!titleEmpty && "Toutes")}
           </li>
+
           {!collapsed && (
             <>
               {!titleEmpty && (
-                <li onClick={() => changeValue(null)}>
+                <li
+                  onClick={() => changeValue(null)}
+                  data-testid="select-option-toutes"
+                >
                   <input defaultChecked={!value} name="selected" type="radio" />{" "}
                   Toutes
                 </li>
               )}
               {selection.map((s) => (
-                <li key={s} onClick={() => changeValue(s)}>
+                <li
+                  key={s}
+                  onClick={() => changeValue(s)}
+                  data-testid={`select-option-${s}`}
+                >
                   <input
                     defaultChecked={value === s}
                     name="selected"
@@ -88,7 +102,7 @@ Select.propTypes = {
   titleEmpty: PropTypes.bool,
   label: PropTypes.string,
   type: PropTypes.string,
-}
+};
 
 Select.defaultProps = {
   onChange: () => null,
@@ -96,6 +110,15 @@ Select.defaultProps = {
   label: "",
   type: "normal",
   name: "select",
-}
+};
+
+const handleFilterChange = (value) => {
+  console.log("Valeur sélectionnée :", value); // Confirmez que la valeur est transmise
+};
+
+<Select
+  selection={["Catégorie 1", "Catégorie 2", "Catégorie 3"]}
+  onChange={handleFilterChange}
+/>;
 
 export default Select;
